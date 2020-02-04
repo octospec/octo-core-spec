@@ -188,18 +188,24 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AvailabilityStatus'
+                  $ref: '#/components/schemas/AvailabilityStatusWithPrice'
                 example:
                   - id: '28271273-a317-40fc-8f42-79725a7072a3'
                     localDateTimeStart: '2019-10-31T08:30:00Z'
                     localDateTimeEnd: '2019-10-31T10:00:00Z'
                     status: 'AVAILABLE'
                     vacancies: 100
+                    price:
+                      amount: '129.45'
+                      currency: 'EUR'
                   - id: '6143d137-fdf6-4da1-a558-20aa93eb55f0'
                     localDateTimeStart: '2019-10-31T12:00:00Z'
                     localDateTimeEnd: '2019-10-31T13:00:00Z'
                     status: 'FREESALE'
                     vacancies: null
+                    price:
+                      amount: '60.00'
+                      currency: 'EUR'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -513,6 +519,18 @@ components:
               description: |
                 Returns `null` when `status` is `FREESALE`. This SHOULD be a shared pool for all Unit types in the Option. If availability is tracked per-Unit then this value MUST be equal to the available quantity for the Unit that has the most remaining.
               example: 100
+    AvailabilityStatusWithPrice:
+      allOf:
+        - $ref: '#/components/schemas/AvailabilityStatus'
+        - type: object
+          required:
+            - price
+          properties:
+            price:
+              $ref: '#/components/schemas/Money'
+              description: |
+                Estimated price to book the requested inventory for this availability slot.
+
     AvailabilityId:
       type: string
       description: |
@@ -523,6 +541,7 @@ components:
       required:
         - uuid
         - status
+        - price
         - utcHoldExpiration
         - utcConfirmedAt
         - utcDeliveredAt
@@ -591,6 +610,10 @@ components:
           description: |
             A valid option ID that matches the `id` returned from `GET /suppliers/{supplierId}/products`.
           example: 'LR1-01'
+        price:
+          $ref: '#/components/schemas/Money'
+          description: |
+            Price the supplier would expect to be compensated for this booking.
         availability:
           $ref: '#/components/schemas/Availability'
         contact:
@@ -737,6 +760,11 @@ components:
           description: |
             This MUST be a valid [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code.
           example: 'GB'
+    Currency:
+      type: string
+      description: |
+        This MUST be a valid [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.
+      example: 'EUR'
     DeliveryFormat:
       type: string
       enum:
@@ -778,6 +806,23 @@ components:
       description: |
         This MUST be a valid [BCP 47](https://tools.ietf.org/html/bcp47) [RFC 5646](https://tools.ietf.org/html/rfc5646) [RFC 4647](https://tools.ietf.org/html/rfc4647) language tag.
       example: 'en-GB'
+    Money:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]+)?$'
+          description: |
+            This MUST be expressed as a decimal, with major currency units separated from minor currency units with a decimal point. If a currency has no minor currency units, such as with the Japanese yen, the decimal point MYA be excluded. Major and minor currency units are defined as part of the [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217#Treatment_of_minor_currency_units_%28the_%22exponent%22%29) standard. Trailing zeros on minor currency units MAY be omitted.
+          example: '129.45'
+        currency:
+          $ref: '#/components/schemas/Currency'
+      example:
+        - amount: '129.45'
+          currency: 'EUR'
     Option:
       type: object
       required:
@@ -821,6 +866,7 @@ components:
         - internalName
         - locale
         - timeZone
+        - currency
         - instantConfirmation
         - instantDelivery
         - availabilityType
@@ -851,6 +897,10 @@ components:
           description: |
             This MUST be a valid database name from the ICANN [tz database](https://en.wikipedia.org/wiki/Tz_database). Any calculation of UTC offset or UTC DTC offset MUST use the correct offset from this database.
           example: 'Europe/London'
+        currency:
+          $ref: '#/components/schemas/Currency'
+          description: |
+            The currency that product inventory will be priced in. This MUST be a valid [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.
         instantConfirmation:
           type: boolean
           description: |
