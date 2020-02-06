@@ -1,6 +1,8 @@
 # Independent Connectivity Forum
 
-This project includes an independently-developed API specification for facilitating communcation between partners, SLA guidelines, as well as templates and validation tools for implementing the API.
+This project includes an independently-developed API specification for facilitating communication between partners, SLA guidelines, as well as templates and validation tools for implementing the API.
+
+To run the documentation locally, clone the repository and run `npm start`.
 
 ## API Structure
 

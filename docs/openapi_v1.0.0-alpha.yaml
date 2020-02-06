@@ -298,7 +298,7 @@ paths:
     delete:
       tags:
         - Bookings
-      summary: 'Expire the hold of an existing reservation.'
+      summary: 'Either cancel the booking, or expire the hold of an existing reservation.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
@@ -307,89 +307,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/SupplierId'
         - $ref: '#/components/parameters/Uuid'
-      responses:
-        '200':
-          $ref: '#/components/responses/BookingReservationResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /suppliers/{supplierId}/bookings/{uuid}/cancel:
-    post:
-      tags:
-        - Cancellations
-      summary: 'Create a new cancellation request.'
-      description: |
-        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
-
-        This creates a new cancellation request for a booking with `status` of `CONFIRMED`. Cancellation policy rules MUST be validated at this time.
-      operationId: 'createCancellation'
-      parameters:
-        - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/Uuid'
-      requestBody:
-        $ref: '#/components/requestBodies/CreateCancellationRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/BookingReservationResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Cancellations
-      summary: 'Expire the hold of an existing cancellation request.'
-      description: |
-        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
-
-        This expires the hold of an existing cancellation request. If a cancellation request is sent again in the future, it MUST start with a new `createCancellation` request because the `utcRequestedAt` SHOULD be cleared after successfully processing this request.
-      operationId: 'expireCancellation'
-      parameters:
-        - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/Uuid'
-      responses:
-        '200':
-          $ref: '#/components/responses/BookingReservationResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /suppliers/{supplierId}/bookings/{uuid}/confirmCancel:
-    post:
-      tags:
-        - Cancellations
-      summary: 'Confirm an existing cancellation request.'
-      description: |
-        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
-
-        This confirms an existing cancellation request. Any cancellation policy MUST reference the `utcRequestedAt` and not use the timestamp of this request.
-      operationId: 'confirmCancellation'
-      parameters:
-        - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/Uuid'
-      requestBody:
-        $ref: '#/components/requestBodies/ConfirmCancellationRequest'
       responses:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
@@ -542,6 +459,7 @@ components:
         - uuid
         - status
         - total
+        - cancellable
         - utcHoldExpiration
         - utcConfirmedAt
         - utcDeliveredAt
@@ -552,7 +470,6 @@ components:
         - deliveryMethods
         - voucher
         - unitItems
-        - cancellationRequest
       properties:
         uuid:
           type: string
@@ -566,6 +483,11 @@ components:
           $ref: '#/components/schemas/SupplierReference'
         status:
           $ref: '#/components/schemas/Status'
+        cancellable:
+          type: boolean
+          description: |
+            Indicates whether the booking is cancellable right now
+          example: true
         utcHoldExpiration:
           type: string
           format: date-time
@@ -595,7 +517,7 @@ components:
           description: |
             This is the RECOMMENDED refresh interval for the Reseller and SHOULD be used by the Reseller to control the frequency at which they make a `getBooking` request for the following scenarios:
 
-            * To see if a booking/cancellation has changed out of a `PENDING` status into `CONFIRMED` or `REJECTED`.
+            * To see if a booking has changed out of a `PENDING` status into `CONFIRMED` or `REJECTED`.
             * To see if a booking has had any new Vouchers or Tickets delivered for the booking.
             * To see if a booking has changed from `CONFIRMED` to `CANCELLED` in the event of a supplier-initiated cancellation.
             * To see if a booking has an updated `utcRedeemedAt`/`utcResolvedAt` value for the Voucher or any of the Tickets.
@@ -634,69 +556,6 @@ components:
           items:
             $ref: '#/components/schemas/UnitItemTicket'
           minItems: 1
-        cancellationRequest:
-          # https://github.com/OAI/OpenAPI-Specification/issues/1368
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/CancellationRequest'
-    CancellationRequest:
-      type: object
-      required:
-        - reason
-        - reasonDetails
-        - status
-        - refund
-        - utcRequestedAt
-        - utcHoldExpiration
-        - utcConfirmedAt
-        - utcResolvedAt
-      properties:
-        reason:
-          $ref: '#/components/schemas/Reason'
-        reasonDetails:
-          $ref: '#/components/schemas/ReasonDetails'
-        status:
-          $ref: '#/components/schemas/Status'
-        refund:
-          type: string
-          enum:
-            - FULL
-            - PARTIAL
-            - NONE
-          description: |
-            This value indicates the expected refund from the Supplier.
-
-            * `FULL` indicates that the Supplier has fully refunded the booking and will not be paid by the Reseller for this booking. This is the expected state when a valid cancellation request is made before any cancellation cutoff policy or when a Supplier approves a cancellation request that was made after the cutoff.
-            * `PARTIAL` indicates that the Supplier has agreed to partially refund the customer. This may be due to a cancellation policy that grants a partial refund or because the Supplier has agreed to partially refund the customer when the cancellation policy would otherwise have not allowed any refund.
-            * `NONE` indicates that no refund will be given by the Supplier. The customer may still be refunded by the Reseller but the Supplier MUST still be paid for this booking.
-          example: 'FULL'
-        utcRequestedAt:
-          type: string
-          format: date-time
-          description: |
-            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation request was originally started. This timestamp MUST be used for any validation against a cancellation policy. This is important because there may be some delay in confirming this cancellation request during the 2-phase workflow which could finish just after the cancellation policy cutoff has elapsed.
-          example: '2019-10-31T08:30:00Z'
-        utcHoldExpiration:
-          type: string
-          format: date-time
-          nullable: true
-          description: |
-            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation request hold will be released. This SHOULD be equivalent to the time calculated by adding `holdExpirationMinutes` to the current UTC time but MAY be either earlier or later than the requested duration.
-          example: '2019-10-31T08:30:00Z'
-        utcConfirmedAt:
-          type: string
-          format: date-time
-          nullable: true
-          description: |
-            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation request was confirmed by the Reseller.
-          example: '2019-10-31T08:30:00Z'
-        utcResolvedAt:
-          type: string
-          format: date-time
-          nullable: true
-          description: |
-            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation was confirmed. This will typically be the same as `utcConfirmedAt` however if the cancellation request required manual approval from the Supplier, it may be different.
-          example: '2019-10-31T08:30:00Z'
     Capability:
       type: object
       required:
@@ -1029,7 +888,7 @@ components:
             - CONFIRMED
             - CANCELLED
           description: |
-            After a successful `createReservation` or `createCancellation` request, the `status` MUST be `ON_HOLD`.
+            After a successful `createReservation` request, the `status` MUST be `ON_HOLD`.
 
             After a successful `confirmReservation` request, the `status` MUST be `CONFIRMED`.
 
@@ -1471,38 +1330,6 @@ components:
                 $ref: '#/components/schemas/ResellerReference'
               contact:
                 $ref: '#/components/schemas/Contact'
-    CreateCancellationRequest:
-      required: true
-      description: |
-        This SHOULD be sent prior to any cancellation policy cutoff but MAY be sent if requesting a Supplier-approved exception to the policy. It SHOULD also be sent even if no refund is expected so that the Supplier can attempt to sell the unused inventory to another customer.
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - reason
-              - reasonDetails
-            properties:
-              reason:
-                $ref: '#/components/schemas/Reason'
-              reasonDetails:
-                $ref: '#/components/schemas/ReasonDetails'
-    ConfirmCancellationRequest:
-      required: true
-      description: |
-        This confirms an existing cancellation request and MUST be sent before the `utcHoldExpiration` has elapsed.
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - reason
-              - reasonDetails
-            properties:
-              reason:
-                $ref: '#/components/schemas/Reason'
-              reasonDetails:
-                $ref: '#/components/schemas/ReasonDetails'
 
   securitySchemes:
     apiKey:
@@ -1514,4 +1341,3 @@ tags:
   - name: Products
   - name: Availability
   - name: Bookings
-  - name: Cancellations
