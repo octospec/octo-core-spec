@@ -195,7 +195,7 @@ paths:
                     localDateTimeEnd: '2019-10-31T10:00:00Z'
                     status: 'AVAILABLE'
                     vacancies: 100
-                    price:
+                    total:
                       amount: '129.45'
                       currency: 'EUR'
                   - id: '6143d137-fdf6-4da1-a558-20aa93eb55f0'
@@ -203,7 +203,7 @@ paths:
                     localDateTimeEnd: '2019-10-31T13:00:00Z'
                     status: 'FREESALE'
                     vacancies: null
-                    price:
+                    total:
                       amount: '60.00'
                       currency: 'EUR'
         '400':
@@ -524,12 +524,12 @@ components:
         - $ref: '#/components/schemas/AvailabilityStatus'
         - type: object
           required:
-            - price
+            - total
           properties:
-            price:
+            total:
               $ref: '#/components/schemas/Money'
               description: |
-                Estimated price to book the requested inventory for this availability slot.
+                Estimated total price to book the requested inventory for this availability slot.
 
     AvailabilityId:
       type: string
@@ -541,7 +541,7 @@ components:
       required:
         - uuid
         - status
-        - price
+        - total
         - utcHoldExpiration
         - utcConfirmedAt
         - utcDeliveredAt
@@ -610,7 +610,7 @@ components:
           description: |
             A valid option ID that matches the `id` returned from `GET /suppliers/{supplierId}/products`.
           example: 'LR1-01'
-        price:
+        total:
           $ref: '#/components/schemas/Money'
           description: |
             Price the supplier would expect to be compensated for this booking.
