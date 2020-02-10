@@ -67,7 +67,18 @@ paths:
                 items:
                   $ref: '#/components/schemas/Product'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+          description: |
+            Use the following errorCode values:  
+            1001: supplierId not found / invalid  
+            1002: productId not found / invalid  
+            1003: optionId not found / invalid  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -157,7 +168,21 @@ paths:
                     status: 'FREESALE'
                     vacancies: null
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+          description: |
+            Use the following errorCode values:  
+            1001: supplierId not found / invalid  
+            1002: productId not found / invalid  
+            1003: optionId not found / invalid  
+            1004: availabilityId not found / invalid  
+            1006: localDateStart invalid
+            1007: localDateEnd invalid
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -201,7 +226,22 @@ paths:
                     status: 'FREESALE'
                     vacancies: null
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+          description: |
+            Use the following errorCode values:  
+            **1001**: supplierId not found / invalid  
+            **1002**: productId not found / invalid  
+            **1003**: optionId not found / invalid  
+            **1004**: availabilityIds not found / invalid  
+            **1006**: localDateStart invalid  
+            **1007**: localDateEnd invalid  
+            **1008**: units not found / invalid
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -228,7 +268,18 @@ paths:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+          description: |
+            Use the following errorCode values:  
+            **1001**: supplierId not found / invalid  
+            **1005**: uuid of reservation/booking not found / invalid  
+            **1501**: Reservation expired  
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -280,7 +331,25 @@ paths:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+          description: |
+            Use the following errorCode values:  
+            **1001**: supplierId invalid  
+            **1002**: productId invalid  
+            **1003**: optionId invalid  
+            **1004**: availabilityId not found / invalid  
+            **1005**: uuid of reservation/booking invalid  
+            **1009**: resellerReference not set / invalid  
+            **1501**: Reservation expired  
+            **1504**: Reservation ID not found  
+            **1505**: No more availability  
+            **MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING**
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -305,7 +374,27 @@ paths:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+          description: |
+            Use the following errorCode values:  
+            **1001**: supplierId invalid  
+            **1002**: productId invalid  
+            **1003**: optionId invalid  
+            **1004**: availabilityId not found / invalid  
+            **1005**: uuid of reservation/booking invalid  
+            **1009**: resellerReference not set / invalid  
+            **1501**: Reservation expired  
+            **1502**: Hold period too long  
+            **1503**: Cannot extend hold period  
+            **1504**: Reservation ID not found  
+            **1505**: No more availability  
+            **MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING**
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -533,6 +622,31 @@ components:
           items:
             $ref: '#/components/schemas/UnitItemTicket'
           minItems: 1
+    ErrorObject:
+      type: object
+      required:
+        - errorCode
+        - errorMessage
+        - fieldName
+      properties:
+        errorCode:
+          type: string
+          nullable: true
+          description: |
+            Contains a namespaced error code. When no specific error code applies, use 1000. In serious cases use 9999 accompanied by an HTTP 500 status code. 
+            The namespace is used to distinguish between core and specific capabilities the server may use and
+              must match the regular expression /[a-z\-]*\/[0-9]{4}/. 
+          example: 'core/1002'
+        errorMessage:
+          type: string
+          description: |
+            Contains a clear, human readable error message that properly describes the issue.
+          example: 'The `productId` provided is missing or invalid.'
+        fieldName:
+          type: string
+          description: |
+            Contains a string identifying the field in the HTTP body or parameter in the URL that the error applies to. Use an empty string if not applicable.
+          example: 'productId'
     Capability:
       type: object
       required:
