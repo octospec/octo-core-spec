@@ -215,12 +215,14 @@ paths:
     get:
       tags:
         - Bookings
-      summary: 'Gets the current details of an in-progress reservation or completed booking.'
+      summary: 'Gets the current details of an in-progress reservations or completed bookings of a supplier.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This returns the current state of any valid booking. This request MAY be made at any point after the initial `createReservation` request is processed successfully and it MUST return the booking reservation object.
-      operationId: 'getBooking'
+        This returns the current state of any valid bookings. This request MAY be made at any point after the initial `createReservation` request is processed successfully and it MUST return the booking reservation object.
+
+        TODO support pagination using headers?
+      operationId: 'getBookings'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
       responses:
@@ -244,7 +246,7 @@ paths:
       summary: 'Get the booking details.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
-      operationId: 'getBookings'
+      operationId: 'getBooking'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
         - $ref: '#/components/parameters/Uuid'
