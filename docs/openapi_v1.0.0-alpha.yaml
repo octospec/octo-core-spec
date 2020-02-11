@@ -223,7 +223,6 @@ paths:
       operationId: 'getBooking'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/Uuid'
       responses:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
