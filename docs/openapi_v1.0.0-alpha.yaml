@@ -1198,8 +1198,6 @@ components:
               - availabilityId
               - unitItems
             properties:
-              uuid:
-                $ref: '#/components/schemas/Uuid'
               resellerReference:
                 $ref: '#/components/schemas/ResellerReference'
               productId:
