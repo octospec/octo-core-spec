@@ -1193,7 +1193,6 @@ components:
           schema:
             type: object
             required:
-              - uuid
               - productId
               - optionId
               - availabilityId
