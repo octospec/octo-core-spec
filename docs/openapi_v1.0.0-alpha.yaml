@@ -1115,15 +1115,12 @@ components:
         type: string
         format: uuid
     OptionIds:
-      name: optionIds
+      name: optionId
       in: query
       description: |
-        A list of valid option IDs that matches `id`s returned from `GET /suppliers/{supplierId}/products`. TODO: IS THIS REALLY CORRECT??
+        A valid option ID that matches the `id` returned from `GET /suppliers/{supplierId}/products`.
       schema:
-        type: array
-        items:
-          type: string
-          format: string
+        type: string
       required: false
   requestBodies:
     AvailabilityCheckRequest:
