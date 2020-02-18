@@ -1,4 +1,4 @@
-# Independent Connectivity Forum
+# Open Connectivity for Tourism (OCTo)
 
 This project includes an independently-developed API specification for facilitating communication between partners, SLA guidelines, as well as templates and validation tools for implementing the API.
 

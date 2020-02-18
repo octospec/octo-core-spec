@@ -1,19 +1,18 @@
 openapi: 3.0.0
 # Added by API Auto Mocking Plugin
-servers:
-  - description: |
-      SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/gimpster/ICF/1.0.0-alpha
 info:
   description: |
     An open-source API for connecting Resellers and Booking Platforms.
 
     The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14) [RFC 2119](https://tools.ietf.org/html/rfc2119) [RFC 8174](https://tools.ietf.org/html/rfc8174) when, and only when, they appear in all capitals, as shown here.
   version: "1.0.0-alpha"
-  title: 'Independent Connectivity Forum API'
+  title: 'Open Connectivity for Tourism (OCTo) API'
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+externalDocs:
+  description: OCTo Home
+  url: http://octospec.com/
 paths:
   /suppliers:
     get:
