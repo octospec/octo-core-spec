@@ -34,7 +34,20 @@ paths:
                 items:
                   $ref: '#/components/schemas/Supplier'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+              example:
+                  errorClass: 'unknownError'
+                  errorCode: 'core/9000'
+                  errorMessage: 'The stars are not aligned'
+                  retryable: true
+          description: |
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -74,11 +87,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/ErrorObject'
                 minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9001'
+                  errorMessage: 'Invalid or missing parameter <supplierId>'
+                  retryable: false
           description: |
-            Use the following errorCode values:  
-            1001: supplierId not found / invalid  
-            1002: productId not found / invalid  
-            1003: optionId not found / invalid  
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -102,6 +117,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CalendarItem'
+        '400':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9001'
+                  errorMessage: 'Invalid or missing parameter <supplierId>'
+                  retryable: false
+                - errorClass: 'illegalOperationError'
+                  errorCode: 'core/9006'
+                  errorMessage: 'Date range too large. Max supported range is 62 days.'
+                  retryable: false
+                - errorClass: 'illegalOperationError'
+                  errorCode: 'core/9003'
+                  errorMessage: '<localDateStart> date in the past'
+                  retryable: false                  
+          description: |
+            An error has occurred. See the definition of the ErrorObject for more details.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
       operationId: getCalendar
       parameters:
         - $ref: '#/components/parameters/LocalDateStart'
@@ -175,14 +221,21 @@ paths:
                 items:
                   $ref: '#/components/schemas/ErrorObject'
                 minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9001'
+                  errorMessage: 'Invalid or missing parameter <supplierId>'
+                  retryable: false
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9002'
+                  errorMessage: 'Unknown value for <productId> provided.'
+                  retryable: false
+                - errorClass: 'illegalOperationError'
+                  errorCode: 'core/9003'
+                  errorMessage: '<localDateStart> date in the past'
+                  retryable: false                  
           description: |
-            Use the following errorCode values:  
-            1001: supplierId not found / invalid  
-            1002: productId not found / invalid  
-            1003: optionId not found / invalid  
-            1004: availabilityId not found / invalid  
-            1006: localDateStart invalid
-            1007: localDateEnd invalid
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -233,15 +286,21 @@ paths:
                 items:
                   $ref: '#/components/schemas/ErrorObject'
                 minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9001'
+                  errorMessage: 'Invalid or missing parameter <units[0].id>'
+                  retryable: false
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9001'
+                  errorMessage: 'Invalid or missing parameter <units[1].id>'
+                  retryable: false
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9002'
+                  errorMessage: 'Unknown value for <availabilityIds[28271273-a317-40fc-8f42-79725a7072a3]> provided.'
+                  retryable: false
           description: |
-            Use the following errorCode values:  
-            **1001**: supplierId not found / invalid  
-            **1002**: productId not found / invalid  
-            **1003**: optionId not found / invalid  
-            **1004**: availabilityIds not found / invalid  
-            **1006**: localDateStart invalid  
-            **1007**: localDateEnd invalid  
-            **1008**: units not found / invalid
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -275,11 +334,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/ErrorObject'
                 minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9002'
+                  errorMessage: 'Unknown value for <uuid> provided.'
+                  retryable: false
           description: |
-            Use the following errorCode values:  
-            **1001**: supplierId not found / invalid  
-            **1005**: uuid of reservation/booking not found / invalid  
-            **1501**: Reservation expired  
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -304,7 +365,20 @@ paths:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9002'
+                  errorMessage: 'Unknown value for <uuid> provided.'
+                  retryable: false
+          description: |
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -338,18 +412,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/ErrorObject'
                 minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9002'
+                  errorMessage: 'Unknown value for <uuid> provided.'
+                  retryable: false
           description: |
-            Use the following errorCode values:  
-            **1001**: supplierId invalid  
-            **1002**: productId invalid  
-            **1003**: optionId invalid  
-            **1004**: availabilityId not found / invalid  
-            **1005**: uuid of reservation/booking invalid  
-            **1009**: resellerReference not set / invalid  
-            **1501**: Reservation expired  
-            **1504**: Reservation ID not found  
-            **1505**: No more availability  
-            **MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING**
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -381,20 +450,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/ErrorObject'
                 minItems: 1
+              example:
+                - errorClass: 'inputValidationError'
+                  errorCode: 'core/9002'
+                  errorMessage: 'Unknown value for <uuid> provided.'
+                  retryable: false
           description: |
-            Use the following errorCode values:  
-            **1001**: supplierId invalid  
-            **1002**: productId invalid  
-            **1003**: optionId invalid  
-            **1004**: availabilityId not found / invalid  
-            **1005**: uuid of reservation/booking invalid  
-            **1009**: resellerReference not set / invalid  
-            **1501**: Reservation expired  
-            **1502**: Hold period too long  
-            **1503**: Cannot extend hold period  
-            **1504**: Reservation ID not found  
-            **1505**: No more availability  
-            **MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING MORE STUFF IS MISSING**
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -423,7 +485,20 @@ paths:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+              example:
+                - errorClass: 'illegalOperationError'
+                  errorCode: 'core/9009'
+                  errorMessage: 'Reservation could not be extended. Limit reached.'
+                  retryable: false
+          description: |
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -452,7 +527,20 @@ paths:
         '200':
           $ref: '#/components/responses/BookingReservationResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ErrorObject'
+                minItems: 1
+              example:
+                - errorClass: 'illegalOperationError'
+                  errorCode: 'core/9007'
+                  errorMessage: 'Reservation Expired'
+                  retryable: false
+          description: |
+            An error has occurred. See the definition of the ErrorObject for more details.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -625,28 +713,76 @@ components:
     ErrorObject:
       type: object
       required:
+        - errorClass
         - errorCode
         - errorMessage
-        - fieldName
+        - retryable
       properties:
-        errorCode:
+        errorClass:
           type: string
-          nullable: true
+          enum:
+          - availabilityError
+          - inputValidationError
+          - illegalOperationError
+          - unknownError
           description: |
-            Contains a namespaced error code. When no specific error code applies, use 1000. In serious cases use 9999 accompanied by an HTTP 500 status code. 
-            The namespace is used to distinguish between core and specific capabilities the server may use and
-              must match the regular expression /[a-z\-]*\/[0-9]{4}/. 
-          example: 'core/1002'
+            A high level classification of the error category.  
+            `availabilityError`: The availability of a product is not sufficient to permit the client to create a booking.  
+            
+            `illegalOperationError`: The client is trying to perform an operation that does not comply with certain business logic. Eg.: Trying to cancel a booking while the cancellation window has passed.  
+            
+            `inputValidationError`: One or more input parameters contain invalid values or are missing.  
+            
+            `unknownError`: A last-resort fallback option in case none of the other error classes seem appropriate. Usage of this error class is discouraged.
         errorMessage:
           type: string
+          nullable: false
           description: |
             Contains a clear, human readable error message that properly describes the issue.
           example: 'The `productId` provided is missing or invalid.'
-        fieldName:
+        errorCode:
           type: string
+          nullable: false
           description: |
-            Contains a string identifying the field in the HTTP body or parameter in the URL that the error applies to. Use an empty string if not applicable.
-          example: 'productId'
+            Contains a namespaced error code.  
+            The namespace is used to distinguish between core errors and the errors of custom capabilities the server may have implemented and
+              must match the regular expression /[a-z\-]*\/[0-9]{4}\/[a-zA-Z \-]*/.  
+              
+            The `9000-9999` range is reserved for official OCTo error codes.  
+            The `0000-8999` range can be used for scenarios that aren't covered by the OCTo spec.  
+            When no specific error code applies, use 9000.  
+            In serious cases use 9999 accompanied by an HTTP 500 status code. 
+              
+            ## Prescribed values:
+            `9000`: Generic error  
+            `9001`: Invalid or missing input  
+            `9002`: Unknown value provided  
+            `9003`: Date in the past  
+            `9004`: Insufficient availability  
+            `9005`: Cancellation not allowed  
+            `9006`: Date range too large  
+            `9007`: Reservation expired  
+            `9008`: Hold period too long  
+            `9009`: Cannot extend hold period  
+            `9010`: Reservation ID not found  
+            `9011`: Reservation expired  
+            `9999`: Generic error for all unexpected / unknown cases  
+              
+          example: 'core/9000'
+        retryable:
+          type: boolean
+          nullable: false
+          description: |
+            The OCTO spec distinguishes between retryable and non-retryable errors. Typically any error is non-retryable, but there are a few exceptions. 
+              * A __non-retryable__ error is an error that indicates human intervention is needed. For example
+                * Invalid product / unit ID provided - This suggests there is a mapping problem due to a changed configuration
+                * Insufficient credits - The outstanding rolling deposit with the supplier has depleted and a top-up is needed to continue sales. Note that support for this is not included in the core API specification.
+                * Authentication failure - Credentials may need to be updated
+              * A __retryable__ error is an error that the consumer of the API generally won't have to take action on. The supplier is likely to find out about the issue and is bound to fix it soon and the call can simply be retried later. This includes situations like
+                * Time outs / down-time
+                * Server errors like HTTP 500 without error object in the response body
+                * No more availability for a date / timeslot while placing an order
+          example: 'false'
     Capability:
       type: object
       required:
