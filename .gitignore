@@ -17,3 +17,9 @@
 
 # Ignore npm packages
 node_modules
+
+### IntelliJ IDEA metadata files ###
+.idea
+*.iws
+*.iml
+*.ipr
