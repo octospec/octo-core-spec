@@ -97,7 +97,9 @@ paths:
         - $ref: '#/components/parameters/LocalDateEnd'
         - $ref: '#/components/parameters/ProductId'
         - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/OptionIds'
+        - allOf:
+            - $ref: '#/components/parameters/OptionId'
+            - required: false
       description: |-
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
@@ -144,7 +146,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AvailabilityStatus'
+                  $ref: '#/components/schemas/AvailabilityTimeslot'
                 example:
                   - id: '28271273-a317-40fc-8f42-79725a7072a3'
                     localDateTimeStart: '2019-10-31T08:30:00Z'
@@ -188,7 +190,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AvailabilityStatus'
+                  $ref: '#/components/schemas/AvailabilityTimeslot'
                 example:
                   - id: '28271273-a317-40fc-8f42-79725a7072a3'
                     localDateTimeStart: '2019-10-31T08:30:00Z'
@@ -387,6 +389,23 @@ components:
           format: date-time
           example: '2019-10-31T10:00:00Z'
     AvailabilityStatus:
+      type: string
+      description: |
+        This represents whether the availability in this configuration is currently bookable. The values have the following meanings:
+
+        * `FREESALE`: Always available.
+        * `AVAILABLE`: Currently available for sale, but has a fixed capacity.
+        * `LIMITED`: Currently available for sale, but has a fixed capacity and may be sold out soon.
+        * `SOLD_OUT`: Currently sold out, but additional availability may free up.
+        * `CLOSED`: Currently not available for sale, but not sold out (e.g. temporarily on stop-sell) and may be available for sale soon.
+      enum:
+        - FREESALE
+        - AVAILABLE
+        - LIMITED
+        - SOLD_OUT
+        - CLOSED
+      example: 'AVAILABLE'
+    AvailabilityTimeslot:
       allOf:
         - $ref: '#/components/schemas/Availability'
         - type: object
@@ -395,22 +414,7 @@ components:
             - vacancies
           properties:
             status:
-              type: string
-              description: |
-                This represents whether the availability in this configuration is currently bookable. The values have the following meanings:
-
-                * `FREESALE`: Always available.
-                * `AVAILABLE`: Currently available for sale, but has a fixed capacity.
-                * `LIMITED`: Currently available for sale, but has a fixed capacity and may be sold out soon.
-                * `SOLD_OUT`: Currently sold out, but additional availability may free up.
-                * `CLOSED`: Currently not available for sale, but not sold out (e.g. temporarily on stop-sell) and may be available for sale soon.
-              enum:
-                - FREESALE
-                - AVAILABLE
-                - LIMITED
-                - SOLD_OUT
-                - CLOSED
-              example: 'AVAILABLE'
+              $ref: '#/components/schemas/AvailabilityStatus'
             vacancies:
               type: integer
               nullable: true
@@ -1029,13 +1033,22 @@ components:
     CalendarItem:
       title: CalendarItem
       type: object
+      required:
+        - localDate
+        - capacity
+        - status
       properties:
         localDate:
           type: string
           format: date
+        status:
+          $ref: '#/components/schemas/AvailabilityStatus'
         capacity:
           type: integer
           minimum: 0
+          nullable: true
+          description: |
+            Returns `null` when `status` is `FREESALE`. This SHOULD be a shared pool for all Unit types in the Option. If availability is tracked per-Unit then this value MUST be equal to the available quantity for the Unit that has the most remaining.
   responses:
     BadRequest:
       description: |
@@ -1114,14 +1127,6 @@ components:
       schema:
         type: string
         format: uuid
-    OptionIds:
-      name: optionId
-      in: query
-      description: |
-        A valid option ID that matches the `id` returned from `GET /suppliers/{supplierId}/products`.
-      schema:
-        type: string
-      required: false
   requestBodies:
     AvailabilityCheckRequest:
       required: true
