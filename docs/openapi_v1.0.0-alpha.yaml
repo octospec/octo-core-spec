@@ -735,22 +735,31 @@ components:
           type: string
           nullable: false
           description: |
-            Contains a clear, human readable error message that properly describes the issue.
-          example: 'The `productId` provided is missing or invalid.'
+            Contains a clear, human readable error message that properly describes the issue which MAY comply with the following rules:
+            * No capitalization
+            * No punctuation other than a comma
+            * Field names must:
+              * Be enclosed by < and > symbols
+              * Contain a full path to the value, including array indexes
+          example: 'invalid or missing parameter <units[0].id>'
         errorCode:
           type: string
           nullable: false
           description: |
             Contains a namespaced error code.  
             The namespace is used to distinguish between core errors and the errors of custom capabilities the server may have implemented and
-              must match the regular expression /[a-z\-]*\/[0-9]{4}\/[a-zA-Z \-]*/.  
+              MUST match the regular expression /[a-z\-]*\/[0-9]{4}\/[a-zA-Z \-]*/.  
               
             The `9000-9999` range is reserved for official OCTo error codes.  
             The `0000-8999` range can be used for scenarios that aren't covered by the OCTo spec.  
             When no specific error code applies, use 9000.  
             In serious cases use 9999 accompanied by an HTTP 500 status code. 
               
-            ## Prescribed values:
+            ## Prescribed error codes
+            Using error codes allows the client to programmatically handle errors or determine the gravity of the errors.  
+            The following is a selection of errors codes that should be implemented explicitly.  
+            Failure to do so makes is much harder for a client to re-use the same code with a different partner, without having to adjust to the new partner's errors.  
+            
             `9000`: Generic error  
             `9001`: Invalid or missing input  
             `9002`: Unknown value provided  
