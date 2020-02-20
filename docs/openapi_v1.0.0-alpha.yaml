@@ -434,7 +434,7 @@ paths:
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This expires the availability hold of an existing reservation so that the availablity is release for other booking reservations. This request is a courtesy, however Resellers SHOULD send this in order to ensure proper cleanup of any outstanding holds.
+        This expires the availability hold of an existing reservation so that the availability is release for other booking reservations. This request is a courtesy, however Resellers SHOULD send this in order to ensure proper cleanup of any outstanding holds.
       operationId: 'expireReservation'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
@@ -721,14 +721,11 @@ components:
         errorClass:
           type: string
           enum:
-          - availabilityError
           - inputValidationError
           - illegalOperationError
           - unknownError
           description: |
             A high level classification of the error category.  
-            `availabilityError`: The availability of a product is not sufficient to permit the client to create a booking.  
-            
             `illegalOperationError`: The client is trying to perform an operation that does not comply with certain business logic. Eg.: Trying to cancel a booking while the cancellation window has passed.  
             
             `inputValidationError`: One or more input parameters contain invalid values or are missing.  
@@ -1530,7 +1527,6 @@ components:
                 $ref: '#/components/schemas/ResellerReference'
               contact:
                 $ref: '#/components/schemas/Contact'
-
   securitySchemes:
     apiKey:
       type: apiKey
