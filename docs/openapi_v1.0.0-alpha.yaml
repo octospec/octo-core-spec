@@ -44,7 +44,7 @@ paths:
               example:
                   errorClass: 'unknownError'
                   errorCode: 'core/9000'
-                  errorMessage: 'The stars are not aligned'
+                  errorMessage: 'the stars are not aligned'
                   retryable: true
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -90,7 +90,7 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9001'
-                  errorMessage: 'Invalid or missing parameter <supplierId>'
+                  errorMessage: 'invalid or missing parameter <supplierId>'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -128,11 +128,11 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9001'
-                  errorMessage: 'Invalid or missing parameter <supplierId>'
+                  errorMessage: 'invalid or missing parameter <supplierId>'
                   retryable: false
                 - errorClass: 'illegalOperationError'
                   errorCode: 'core/9006'
-                  errorMessage: 'Date range too large. Max supported range is 62 days.'
+                  errorMessage: 'date range too large, max supported range is 62 days'
                   retryable: false
                 - errorClass: 'illegalOperationError'
                   errorCode: 'core/9003'
@@ -224,11 +224,11 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9001'
-                  errorMessage: 'Invalid or missing parameter <supplierId>'
+                  errorMessage: 'invalid or missing parameter <supplierId>'
                   retryable: false
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9002'
-                  errorMessage: 'Unknown value for <productId> provided.'
+                  errorMessage: 'unknown value for <productId> provided'
                   retryable: false
                 - errorClass: 'illegalOperationError'
                   errorCode: 'core/9003'
@@ -289,15 +289,15 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9001'
-                  errorMessage: 'Invalid or missing parameter <units[0].id>'
+                  errorMessage: 'invalid or missing parameter <units[0].id>'
                   retryable: false
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9001'
-                  errorMessage: 'Invalid or missing parameter <units[1].id>'
+                  errorMessage: 'invalid or missing parameter <units[1].id>'
                   retryable: false
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9002'
-                  errorMessage: 'Unknown value for <availabilityIds[28271273-a317-40fc-8f42-79725a7072a3]> provided.'
+                  errorMessage: 'unknown value for <availabilityIds[28271273-a317-40fc-8f42-79725a7072a3]> provided'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -337,7 +337,7 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9002'
-                  errorMessage: 'Unknown value for <uuid> provided.'
+                  errorMessage: 'unknown value for <uuid> provided'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -375,7 +375,7 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9002'
-                  errorMessage: 'Unknown value for <uuid> provided.'
+                  errorMessage: 'unknown value for <uuid> provided'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -415,7 +415,7 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9002'
-                  errorMessage: 'Unknown value for <uuid> provided.'
+                  errorMessage: 'unknown value for <uuid> provided'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -453,7 +453,7 @@ paths:
               example:
                 - errorClass: 'inputValidationError'
                   errorCode: 'core/9002'
-                  errorMessage: 'Unknown value for <uuid> provided.'
+                  errorMessage: 'unknown value for <uuid> provided'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -495,7 +495,7 @@ paths:
               example:
                 - errorClass: 'illegalOperationError'
                   errorCode: 'core/9009'
-                  errorMessage: 'Reservation could not be extended. Limit reached.'
+                  errorMessage: 'reservation extension limit reached'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
@@ -537,7 +537,7 @@ paths:
               example:
                 - errorClass: 'illegalOperationError'
                   errorCode: 'core/9007'
-                  errorMessage: 'Reservation Expired'
+                  errorMessage: 'reservation expired'
                   retryable: false
           description: |
             An error has occurred. See the definition of the ErrorObject for more details.
