@@ -1319,14 +1319,15 @@ components:
                 description: |
                   This field provides additional details about the reason for the cancellation request. It may include information from the customer, supplier, or support agent about the reason for the cancellation (especially in the case of requesting a cancellation outside of the normal policy which may require manual approval from the supplier).
                 example: 'Child came down with the flu the day before the activity.'
+
   securitySchemes:
-    apiKey:
-      type: apiKey
-      name: Authorization
-      in: header
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Bearer {apiKey}
 
 security:
-  - apiKey: []
+  - bearerAuth: []
 
 tags:
   - name: Suppliers
