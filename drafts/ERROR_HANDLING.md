@@ -1,6 +1,6 @@
 ## Error Reporting:
 ### Background
-1. The ICF specification distinguishes between retryable and non-retryable errors. Typically any error is non-retryable, but there are a few exceptions.
+1. The OCTo specification distinguishes between retryable and non-retryable errors. Typically any error is non-retryable, but there are a few exceptions.
 	* A **non-retryable** error is an error that indicates human intervention is needed. For example:
 		* Invalid product / unit ID provided - _This suggests there is a mapping problem due to a changed configuration_
 		* Insufficient credits - _The outstanding rolling deposit with the supplier has depleted and a top-up is needed to continue sales. Note that support for this is not included in the core API specification._
@@ -110,7 +110,7 @@ No errors identified
 - `ErrorCode` 1506: Cancellation not allowed
 
 ### HTTP 500
-System errors that occur in the software that embeds the ICF may cause erratic behavior or cause hard-to-map errors. Those should be thrown with an HTTP 500 status code.
+System errors that occur in the software that embeds the OCTo specification may cause erratic behavior or cause hard-to-map errors. Those should be thrown with an HTTP 500 status code.
 ```javascript
 [{
 	"errorCode": 9999,
@@ -127,7 +127,7 @@ System errors that occur in the software that embeds the ICF may cause erratic b
 ## NOT FOR PUBLISHING
 ### Error handling thoughts and context**
 > * There could be many different errors which could be caused by an invalid request. Only the ones that are likely to be non-retryable have been assigned their own error code.
-> * Errors that happen in the software that embeds the ICF specification are not easy to standardize. The standard response for that type of error should be of HTTP 500 as it suggests something more serious went wrong, such as:
+> * Errors that happen in the software that embeds the OCTo specification are not easy to standardize. The standard response for that type of error should be of HTTP 500 as it suggests something more serious went wrong, such as:
 >    * Being unable to connect to a database
 >    * An error occurring in the booking software and it's not reasonably possible to return even a proper error object can be returned.
 > * One is expected to use HTTP 400 often.

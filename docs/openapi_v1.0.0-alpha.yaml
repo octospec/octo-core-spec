@@ -1,5 +1,5 @@
 openapi: 3.0.0
-# Added by API Auto Mocking Plugin
+
 info:
   description: |
     An open-source API for connecting Resellers and Booking Platforms.
@@ -10,9 +10,7 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-externalDocs:
-  description: OCTo Home
-  url: http://octospec.com/
+
 paths:
   /suppliers:
     get:
@@ -21,7 +19,7 @@ paths:
       summary: 'Returns a list of suppliers and associated contact details.'
       description: |
         This list MAY be limited based on the suppliers that the authenticated user has been granted access to.
-      operationId: 'getSuppliers'
+      operationId: 'suppliers'
       responses:
         '200':
           description: |
@@ -52,7 +50,7 @@ paths:
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
         Contains all product details necessary to ingest, map, and sell.
-      operationId: 'getProducts'
+      operationId: 'products'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
       responses:
@@ -76,36 +74,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /suppliers/{supplierId}/availability/calendar:
-    get:
-      tags:
-        - Availability
-      summary: Get a list of dates on which tickets are available
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CalendarItem'
-      operationId: getCalendar
-      parameters:
-        - $ref: '#/components/parameters/LocalDateStart'
-        - $ref: '#/components/parameters/LocalDateEnd'
-        - $ref: '#/components/parameters/ProductId'
-        - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/OptionIds'
-      description: |-
-        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
-
-        Returns a list of dates on which tickets are available.
-        Only dates that have availability SHALL BE returned.
-        A minimum range of 31 days MUST BE supported.
-
-        This endpoint proved a relatively lightweight way to show a calendar in a user interface containing a one month calendar with the days where there is no availability greyed out.
-
   /suppliers/{supplierId}/availability:
     get:
       tags:
@@ -118,7 +86,7 @@ paths:
 
         If the product's `availabilityType` is `OPENING_HOURS` then the `localDateTimeStart` and `localDateTimeEnd` are the hours of operation. If a product has more than one hours of operation on the same day (e.g. the supplier is open 8-5 but closed for lunch from 12-1) then one availability object MUST be returned for each contiguous range of time for that day.
 
-        The availability `id` value MUST be sent when making a Reservation request.
+        The availability `id` value MUST be sent when making a Booking request.
 
         The `status` field SHOULD be used to infer how frequently your cache should be updated from the Booking Platform. The RECOMMENDED frequency is as follows:
 
@@ -143,16 +111,16 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AvailabilityStatus'
+                  $ref: '#/components/schemas/AvailabilityItem'
                 example:
                   - id: '28271273-a317-40fc-8f42-79725a7072a3'
-                    localDateTimeStart: '2019-10-31T08:30:00Z'
-                    localDateTimeEnd: '2019-10-31T10:00:00Z'
+                    localDateTimeStart: '2019-10-31T08:30:00'
+                    localDateTimeEnd: '2019-10-31T10:00:00'
                     status: 'AVAILABLE'
                     vacancies: 100
                   - id: '6143d137-fdf6-4da1-a558-20aa93eb55f0'
-                    localDateTimeStart: '2019-10-31T12:00:00Z'
-                    localDateTimeEnd: '2019-10-31T13:00:00Z'
+                    localDateTimeStart: '2019-10-31T12:00:00'
+                    localDateTimeEnd: '2019-10-31T13:00:00'
                     status: 'FREESALE'
                     vacancies: null
         '400':
@@ -172,7 +140,7 @@ paths:
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This request is intended to provide the Booking Platform a complete view of the Unit IDs, Unit quantity, and Availability IDs so that additional restrictions and policies can be validated within the Booking Platform prior to making a Reservation. The purpose is to provide a clear and accurate answer to the Reseller about whether the requested booking configuration could be accepted by the Supplier. This is to support complex booking requirements without the Reseller needing to know the details of the restriction (e.g. "must purchase at least 1 adult ticket if a child ticket is purchased").
+        This request is intended to provide the Booking Platform a complete view of the Unit IDs, Unit quantity, and Availability IDs so that additional restrictions and policies can be validated within the Booking Platform prior to making a Booking. The purpose is to provide a clear and accurate answer to the Reseller about whether the requested booking configuration could be accepted by the Supplier. This is to support complex booking requirements without the Reseller needing to know the details of the restriction (e.g. "must purchase at least 1 adult ticket if a child ticket is purchased").
       operationId: 'availabilityCheck'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
@@ -187,18 +155,56 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AvailabilityStatus'
+                  $ref: '#/components/schemas/AvailabilityItem'
                 example:
                   - id: '28271273-a317-40fc-8f42-79725a7072a3'
-                    localDateTimeStart: '2019-10-31T08:30:00Z'
-                    localDateTimeEnd: '2019-10-31T10:00:00Z'
+                    localDateTimeStart: '2019-10-31T08:30:00'
+                    localDateTimeEnd: '2019-10-31T10:00:00'
                     status: 'AVAILABLE'
                     vacancies: 100
                   - id: '6143d137-fdf6-4da1-a558-20aa93eb55f0'
-                    localDateTimeStart: '2019-10-31T12:00:00Z'
-                    localDateTimeEnd: '2019-10-31T13:00:00Z'
+                    localDateTimeStart: '2019-10-31T12:00:00'
+                    localDateTimeEnd: '2019-10-31T13:00:00'
                     status: 'FREESALE'
                     vacancies: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /suppliers/{supplierId}/availability/calendar:
+    get:
+      tags:
+        - Availability
+      summary: 'Get a list of dates on which tickets are available'
+      description: |
+        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
+
+        Returns a list of dates (no times) and the number of vacancies. The response MUST only include dates that have vacancies and a minimum range of 31 days MUST be supported.
+
+        This endpoint is intended to support a lightweight way to show a calendar in a user interface containing a one month view with the days where there is no availability greyed out.
+      operationId: 'availabilityCalendar'
+      parameters:
+        - $ref: '#/components/parameters/SupplierId'
+        - $ref: '#/components/parameters/ProductId'
+        - $ref: '#/components/parameters/OptionId'
+        - $ref: '#/components/parameters/LocalDateStart'
+        - $ref: '#/components/parameters/LocalDateEnd'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailabilityCalendarItem'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -214,21 +220,21 @@ paths:
     post:
       tags:
         - Bookings
-      summary: 'Create a new booking reservation.'
+      summary: 'Create a new pending booking.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This creates a new booking reservation.
+        This creates a new pending booking.
 
-        This call has to be idempotent. To be able to safely retry a call on any network error or timeout, therefore it MUST not fail on retry or create a duplicate reservation. The idempotency key is the UUID. A supplier SHOULD verify that a retried request with the same UUID is matching the original reservation data, to avoid erroneous clients generating repeating UUIDs and response with the status 400 and ErrorCode 1005 in such case.
-      operationId: 'createReservation'
+        This call has to be idempotent. To be able to safely retry a call on any network error or timeout, therefore it MUST not fail on retry or create a duplicate booking. The idempotency key is the UUID. A supplier SHOULD verify that a retried request with the same UUID is matching the original booking data, to avoid erroneous clients generating repeating UUIDs and response with the status 400 and ErrorCode 1005 in such case.
+      operationId: 'createBooking'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
       requestBody:
-        $ref: '#/components/requestBodies/CreateReservationRequest'
+        $ref: '#/components/requestBodies/CreateBookingRequest'
       responses:
         '200':
-          $ref: '#/components/responses/BookingReservationResponse'
+          $ref: '#/components/responses/BookingResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -244,50 +250,18 @@ paths:
     get:
       tags:
         - Bookings
-      summary: 'Gets the current details of an in-progress reservation or completed booking.'
+      summary: 'Gets the current details of an in-progress booking or completed booking.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This returns the current state of any valid booking. This request MAY be made at any point after the initial `createReservation` request is processed successfully and it MUST return the booking reservation object.
-      operationId: 'getBooking'
+        This returns the current state of any valid booking. This request MAY be made at any point after the initial `createBooking` request is processed successfully and it MUST return the booking object.
+      operationId: 'booking'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
         - $ref: '#/components/parameters/Uuid'
       responses:
         '200':
-          $ref: '#/components/responses/BookingReservationResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      tags:
-        - Bookings
-      summary: 'Either cancel the booking, or expire the hold of an existing reservation.'
-      description: |
-        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
-
-        If the current status of the booking is `CONFIRMED`, this endpoint SHOULD process a cancellation.
-
-        If the current status of the booking is `ON_HOLD`, this endpoint MUST expire the availability hold on the
-        booking so that the availability is released for other booking. This request is a courtesy, however Resellers
-        SHOULD send this in order to ensure proper cleanup of any outstanding holds.
-
-        This call has to be idempotent. To be able to safely retry a call on any network error or timeout, therefore it
-        MUST not fail on retry. The idempotency key is the UUID.
-      operationId: 'expireReservation'
-      parameters:
-        - $ref: '#/components/parameters/SupplierId'
-        - $ref: '#/components/parameters/Uuid'
-      responses:
-        '200':
-          $ref: '#/components/responses/BookingReservationResponse'
+          $ref: '#/components/responses/BookingResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -303,20 +277,20 @@ paths:
     post:
       tags:
         - Bookings
-      summary: 'Extend the hold of an existing reservation.'
+      summary: 'Extend the hold of an in-progress booking.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This extends the hold of an existing reservation. The `utcHoldExpiration` MUST NOT be elapsed when this request is sent, otherwise the response MAY show a `status` of `EXPIRED`.
-      operationId: 'extendReservation'
+        This extends the hold of an in-progress booking. The `utcHoldExpiration` MUST NOT be elapsed when this request is sent, otherwise the response MAY show a `status` of `EXPIRED`.
+      operationId: 'extendBooking'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
         - $ref: '#/components/parameters/Uuid'
       requestBody:
-        $ref: '#/components/requestBodies/ExtendReservationRequest'
+        $ref: '#/components/requestBodies/ExtendBookingRequest'
       responses:
         '200':
-          $ref: '#/components/responses/BookingReservationResponse'
+          $ref: '#/components/responses/BookingResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -332,22 +306,53 @@ paths:
     post:
       tags:
         - Bookings
-      summary: 'Confirm an existing reservation'
+      summary: 'Confirm an in-progress booking.'
       description: |
         **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
 
-        This confirms an existing reservation. The `utcHoldExpiration` MUST NOT be elapsed when this request is sent, otherwise the response MAY show a `status` of `EXPIRED`.
+        This confirms an in-progress booking. The `utcHoldExpiration` MUST NOT be elapsed when this request is sent, otherwise the response MAY show a `status` of `EXPIRED`.
 
-        This call has to be idempotent. To be able to safely retry a call on any network error or timeout, therefore it MUST not fail on retry. The idempotency key is the UUID.
-      operationId: 'confirmReservation'
+        This call MUST be idempotent so that a Reseller may retry the request for any network error or timeout. The Booking `uuid` MUST be used to ensure idempotency of the request.
+      operationId: 'confirmBooking'
       parameters:
         - $ref: '#/components/parameters/SupplierId'
         - $ref: '#/components/parameters/Uuid'
       requestBody:
-        $ref: '#/components/requestBodies/ConfirmReservationRequest'
+        $ref: '#/components/requestBodies/ConfirmBookingRequest'
       responses:
         '200':
-          $ref: '#/components/responses/BookingReservationResponse'
+          $ref: '#/components/responses/BookingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /suppliers/{supplierId}/bookings/{uuid}/cancel:
+    post:
+      tags:
+        - Bookings
+      summary: 'Either cancel the booking, or expire the hold of an in-progress booking.'
+      description: |
+        **WARNING: this endpoint may live under a different domain, path or both depending on the supplier endpoint URL returned by the GET /suppliers.**
+
+        This expires the availability hold of an in-progress booking so that the availablity is release for other bookings. This request is a courtesy, however Resellers SHOULD send this in order to ensure proper cleanup of any outstanding holds.
+
+        This call has to be idempotent. To be able to safely retry a call on any network error or timeout, therefore it MUST not fail on retry. The idempotency key is the UUID.
+      operationId: 'cancelBooking'
+      parameters:
+        - $ref: '#/components/parameters/SupplierId'
+        - $ref: '#/components/parameters/Uuid'
+      requestBody:
+        $ref: '#/components/requestBodies/CancelBookingRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/BookingResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -378,64 +383,84 @@ components:
           description: |
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time.
           format: date-time
-          example: '2019-10-31T08:30:00Z'
+          example: '2019-10-31T08:30:00'
         localDateTimeEnd:
           type: string
           description: |
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time.
           format: date-time
-          example: '2019-10-31T10:00:00Z'
-    AvailabilityStatus:
+          example: '2019-10-31T10:00:00'
+    AvailabilityCalendarItem:
+      type: object
+      required:
+        - localDate
+        - status
+      properties:
+        localDate:
+          type: string
+          description: |
+            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date.
+          format: date
+          example: '2019-10-31'
+        status:
+          $ref: '#/components/schemas/AvailabilityStatus'
+        vacancies:
+          type: integer
+          description: |
+            This SHOULD NOT be returned when `status` is `FREESALE`. This SHOULD be a shared pool for all Unit types in the Option. If availability is tracked per-Unit then this value MUST be equal to the available quantity for the Unit that has the most remaining.
+          example: 100
+          minimum: 0
+    AvailabilityItem:
       allOf:
         - $ref: '#/components/schemas/Availability'
         - type: object
           required:
             - status
-            - vacancies
           properties:
             status:
-              type: string
-              description: |
-                This represents whether the availability in this configuration is currently bookable. The values have the following meanings:
-
-                * `FREESALE`: Always available.
-                * `AVAILABLE`: Currently available for sale, but has a fixed capacity.
-                * `LIMITED`: Currently available for sale, but has a fixed capacity and may be sold out soon.
-                * `SOLD_OUT`: Currently sold out, but additional availability may free up.
-                * `CLOSED`: Currently not available for sale, but not sold out (e.g. temporarily on stop-sell) and may be available for sale soon.
-              enum:
-                - FREESALE
-                - AVAILABLE
-                - LIMITED
-                - SOLD_OUT
-                - CLOSED
-              example: 'AVAILABLE'
+              $ref: '#/components/schemas/AvailabilityStatus'
             vacancies:
               type: integer
-              nullable: true
               description: |
-                Returns `null` when `status` is `FREESALE`. This SHOULD be a shared pool for all Unit types in the Option. If availability is tracked per-Unit then this value MUST be equal to the available quantity for the Unit that has the most remaining.
+                This SHOULD NOT be returned when `status` is `FREESALE`. This SHOULD be a shared pool for all Unit types in the Option. If availability is tracked per-Unit then this value MUST be equal to the available quantity for the Unit that has the most remaining.
               example: 100
-    AvailabilityId:
+              minimum: 0
+    AvailabilityStatus:
       type: string
       description: |
-        A valid availability ID that matches the `id` returned from `GET /availability`.
-      example: '28271273-a317-40fc-8f42-79725a7072a3'
+        This represents whether the availability in this configuration is currently bookable. The values have the following meanings:
+
+        * `FREESALE`: Always available.
+        * `AVAILABLE`: Currently available for sale, but has a fixed capacity.
+        * `LIMITED`: Currently available for sale, but has a fixed capacity and may be sold out soon.
+        * `SOLD_OUT`: Currently sold out, but additional availability may free up.
+        * `CLOSED`: Currently not available for sale, but not sold out (e.g. temporarily on stop-sell) and may be available for sale soon.
+      enum:
+        - FREESALE
+        - AVAILABLE
+        - LIMITED
+        - SOLD_OUT
+        - CLOSED
+      example: 'AVAILABLE'
+    AvailabilityType:
+      type: string
+      description: |
+        This indicates whether the Product redemption is valid only for a specific start time (e.g. a guided tour) or valid any time during normal business hours.
+      enum:
+        - START_TIME
+        - OPENING_HOURS
+      example: 'START_TIME'
     Booking:
       type: object
       required:
         - uuid
         - status
         - cancellable
-        - utcHoldExpiration
-        - utcConfirmedAt
-        - utcDeliveredAt
         - productId
         - optionId
         - availability
         - contact
         - deliveryMethods
-        - voucher
         - unitItems
       properties:
         uuid:
@@ -445,9 +470,15 @@ components:
             This is a randomly-generated UUID that MUST be tracked by both the Reseller and Booking Platform for locating this record.
           example: 'f149068e-300e-452a-a856-3f091239f1d7'
         resellerReference:
-          $ref: '#/components/schemas/ResellerReference'
+          type: string
+          description: |
+            An OPTIONAL tracking reference for the Reseller that SHOULD be tracked by the Booking Platform. This MUST be returned if the value was provided in the request body.
+          example: '001-002'
         supplierReference:
-          $ref: '#/components/schemas/SupplierReference'
+          type: string
+          description: |
+            An OPTIONAL tracking reference for the Supplier that SHOULD be tracked by the Reseller.
+          example: 'ABC-123'
         status:
           $ref: '#/components/schemas/Status'
         cancellable:
@@ -458,37 +489,23 @@ components:
         utcHoldExpiration:
           type: string
           format: date-time
-          nullable: true
           description: |
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the availability hold will be released. This SHOULD be equivalent to the time calculated by adding `holdExpirationMinutes` to the current UTC time but MAY be either earlier or later than the requested duration.
           example: '2019-10-31T08:30:00Z'
         utcConfirmedAt:
           type: string
           format: date-time
-          nullable: true
           description: |
-            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the reservation was confirmed (either automatically by the Booking Platform or manually by the Supplier).
+            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the booking was confirmed (either automatically by the Booking Platform or manually by the Supplier).
           example: '2019-10-31T08:30:00Z'
         utcDeliveredAt:
           type: string
           format: date-time
-          nullable: true
           description: |
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at whcih the VOUCHER was delivered.
           example: '2019-10-31T08:30:00Z'
         refreshFrequency:
-          type: string
-          enum:
-            - HOURLY
-            - DAILY
-          description: |
-            This is the RECOMMENDED refresh interval for the Reseller and SHOULD be used by the Reseller to control the frequency at which they make a `getBooking` request for the following scenarios:
-
-            * To see if a booking has changed out of a `PENDING` status into `CONFIRMED` or `REJECTED`.
-            * To see if a booking has had any new Vouchers or Tickets delivered for the booking.
-            * To see if a booking has changed from `CONFIRMED` to `CANCELLED` in the event of a supplier-initiated cancellation.
-            * To see if a booking has an updated `utcRedeemedAt`/`utcResolvedAt` value for the Voucher or any of the Tickets.
-          example: 'HOURLY'
+          $ref: '#/components/schemas/RefreshFrequency'
         productId:
           type: string
           description: |
@@ -510,15 +527,71 @@ components:
           minItems: 1
           maxItems: 2
         voucher:
-          # https://github.com/OAI/OpenAPI-Specification/issues/1368
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/Ticket'
+          $ref: '#/components/schemas/Ticket'
         unitItems:
           type: array
           items:
             $ref: '#/components/schemas/UnitItemTicket'
           minItems: 1
+        cancellationRequest:
+          $ref: '#/components/schemas/CancellationRequest'
+    CancellationRequest:
+      type: object
+      required:
+        - reason
+        - reasonDetails
+        - status
+        - refund
+        - utcRequestedAt
+        - utcConfirmedAt
+        - utcResolvedAt
+      properties:
+        reason:
+          $ref: '#/components/schemas/CancelReason'
+        reasonDetails:
+          type: string
+          description: |
+            This field provides additional details about the reason for the cancellation request. It may include information from the customer, supplier, or support agent about the reason for the cancellation (especially in the case of requesting a cancellation outside of the normal policy which may require manual approval from the supplier).
+          example: 'Child came down with the flu the day before the activity.'
+        status:
+          $ref: '#/components/schemas/Status'
+        refund:
+          $ref: '#/components/schemas/Refund'
+        utcRequestedAt:
+          type: string
+          format: date-time
+          description: |
+            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation request was originally started. This timestamp MUST be used for any validation against a cancellation policy. This is important because there may be some delay in confirming this cancellation request during the 2-phase workflow which could finish just after the cancellation policy cutoff has elapsed.
+          example: '2019-10-31T08:30:00Z'
+        utcConfirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation request was confirmed by the Reseller.
+          example: '2019-10-31T08:30:00Z'
+        utcResolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the cancellation was confirmed. This will typically be the same as `utcConfirmedAt` however if the cancellation request required manual approval from the Supplier, it may be different.
+          example: '2019-10-31T08:30:00Z'
+    CancelReason:
+      type: string
+      enum:
+        - CUSTOMER
+        - SUPPLIER
+        - FRAUD
+        - OTHER
+      description: |
+        This value indicates the reason that the cancellation request was sent.
+
+        * `CUSTOMER` is the most common and indicates that the customer requested the cancellation.
+        * `SUPPLIER` indicates that the supplier requested the cancellation (possibly due to bad weather or other unexpected circumstances).
+        * `FRAUD` indicates that the booking cancellation is being requested by the Reseller because it has been determined the booking was fraudulent.
+        * `OTHER` indicates that the cancellation reason does not fall into one of these categories. This SHOULD be used only in rare circumstances.
+      example: 'CUSTOMER_REQUESTED'
     Capability:
       type: object
       required:
@@ -529,7 +602,7 @@ components:
         id:
           type: string
           description: |
-            This MUST be a unique identifier within the scope of the ICF. Officially adopted capabilities will be identified only by the name of the capability but any capabilities that are specific to a particular partner MUST be prefixed with that partner's identifier and separated from the capability name with a `/`.
+            This MUST be a unique identifier within the scope of the OCTo specification. Officially adopted capabilities will be identified only by the name of the capability but any capabilities that are specific to a particular partner MUST be prefixed with that partner's identifier and separated from the capability name with a `/`.
           example: 'api.my-booking-platform.com/dynamic-pricing'
         revision:
           type: integer
@@ -546,9 +619,7 @@ components:
       required:
         - fullName
         - emailAddress
-        - phoneNumber
         - locales
-        - country
       properties:
         fullName:
           type: string
@@ -563,14 +634,16 @@ components:
           example: 'traveller@fake.com'
         phoneNumber:
           type: string
-          nullable: true
           description: |
             The contact phone number of the lead traveller.
           example: '+1 555-555-1212'
         locales:
           type: array
           items:
-            $ref: '#/components/schemas/Locale'
+            type: string
+            description: |
+              This MUST be a valid [BCP 47](https://tools.ietf.org/html/bcp47) [RFC 5646](https://tools.ietf.org/html/rfc5646) [RFC 4647](https://tools.ietf.org/html/rfc4647) language tag.
+            example: 'en-GB'
           example:
             - en-GB
             - en-US
@@ -578,7 +651,6 @@ components:
           minItems: 0
         country:
           type: string
-          nullable: true
           description: |
             This MUST be a valid [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code.
           example: 'GB'
@@ -608,57 +680,25 @@ components:
         - deliveryValue
       properties:
         deliveryFormat:
-          # https://github.com/OAI/OpenAPI-Specification/issues/1368
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/DeliveryFormat'
+          $ref: '#/components/schemas/DeliveryFormat'
         deliveryValue:
           type: string
-          nullable: true
           description: |
             Represents the value for the voucher or ticket that should be used. If the `deliveryFormat` is `PDF_URL` then this value MUST be a valid [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) that resolves to a `PDF` resource. For any other `deliveryFormat` this value MUST be encoded according to the `deliveryFormat` value.
           example: '01234567890'
-    Locale:
+    ExtendReason:
       type: string
+      enum:
+        - FRAUD_CHECK
+        - CUSTOMER_REQUESTED
+        - OTHER
       description: |
-        This MUST be a valid [BCP 47](https://tools.ietf.org/html/bcp47) [RFC 5646](https://tools.ietf.org/html/rfc5646) [RFC 4647](https://tools.ietf.org/html/rfc4647) language tag.
-      example: 'en-GB'
-    Option:
-      type: object
-      required:
-        - id
-        - internalName
-        - units
-      properties:
-        id:
-          type: string
-          description: |
-            This MUST be a unique identifier within the scope of the Product.
-          example: '0001'
-        internalName:
-          type: string
-          description: |
-            This SHOULD be a friendly name for the Option to facilitate easier identification. It MUST NOT be shown to the customer.
-          example: 'Morning'
-        reference:
-          type: string
-          description: |
-            This is an internal reference identifier that the Supplier wishes to use. It MAY be non-unique.
-          example: 'LR1-01'
-        units:
-          type: array
-          items:
-            $ref: '#/components/schemas/Unit'
-          minItems: 1
-          example:
-            - id: 'adult'
-              internalName: 'Adult'
-              reference: 'LR1-01-01'
-              type: 'ADULT'
-            - id: '0001-0001-child'
-              internalName: 'Child'
-              reference: 'LR1-01-02'
-              type: 'CHILD'
+        This indicates the reason for extending the booking hold.
+
+        * `FRAUD_CHECK` is the most common scenario where additional time is required to ensure that the booking is not being made using fraudulent payment information.
+        * `CUSTOMER_REQUESTED` is intended for scenarios where the customer is actively completing the checkout process but requires some additional time to complete. The Reseller SHOULD try to ensure that customers may only extend their booking once.
+        * `OTHER` can be used in other unusual circumstances but SHOULD not be abused to maintain a hold without good reason. If this value is specified the Reseller SHOULD provide `reasonDetails` to explain the justification.
+      example: 'FRAUD_CHECK'
     Product:
       type: object
       required:
@@ -690,7 +730,10 @@ components:
             This is an internal reference identifier that the Supplier wishes to use. It MAY be non-unique.
           example: 'LR1-01'
         locale:
-          $ref: '#/components/schemas/Locale'
+          type: string
+          description: |
+            This MUST be a valid [BCP 47](https://tools.ietf.org/html/bcp47) [RFC 5646](https://tools.ietf.org/html/rfc5646) [RFC 4647](https://tools.ietf.org/html/rfc4647) language tag.
+          example: 'en-GB'
         timeZone:
           type: string
           description: |
@@ -701,7 +744,7 @@ components:
           description: |
             This indicates whether the Reseller can expect an immediate confirmation of whether the Supplier has accepted the booking. If `false` then the Reseller MUST be able to delay confirmation to the customer while waiting for the Supplier to accept or reject the Booking.
 
-            When `instantConfirmation` is set to `false` one should expect created reservations to first get into a `PENDING` state.
+            When `instantConfirmation` is set to `false` one should expect created bookings to first get into a `PENDING` state.
           example: true
         instantDelivery:
           type: boolean
@@ -709,13 +752,7 @@ components:
             This indicates whether the Reseller can expect immediate delivery of the customer's tickets. If `false` then the Reseller MUST be able to delay delivery of the tickets to the customer.
           example: true
         availabilityType:
-          type: string
-          description: |
-            This indicates whether the Product redemption is valid only for a specific start time (e.g. a guided tour) or valid any time during normal business hours.
-          enum:
-            - START_TIME
-            - OPENING_HOURS
-          example: 'START_TIME'
+          $ref: '#/components/schemas/AvailabilityType'
         deliveryFormats:
           type: array
           items:
@@ -751,7 +788,7 @@ components:
         options:
           type: array
           items:
-            $ref: '#/components/schemas/Option'
+            $ref: '#/components/schemas/ProductOption'
           minItems: 1
           example:
             - id: '0001'
@@ -778,27 +815,42 @@ components:
                   internalName: 'Child'
                   reference: 'LR1-01-02'
                   type: 'CHILD'
-    Reason:
-      type: string
-      enum:
-        - CUSTOMER
-        - SUPPLIER
-        - FRAUD
-        - OTHER
-      description: |
-        This value indicates the reason that the cancellation request was sent.
-
-        * `CUSTOMER` is the most common and indicates that the customer requested the cancellation.
-        * `SUPPLIER` indicates that the supplier requested the cancellation (possibly due to bad weather or other unexpected circumstances).
-        * `FRAUD` indicates that the booking cancellation is being requested by the Reseller because it has been determined the booking was fraudulent.
-        * `OTHER` indicates that the cancellation reason does not fall into one of these categories. This SHOULD be used only in rare circumstances.
-      example: 'CUSTOMER_REQUESTED'
-    ReasonDetails:
-      type: string
-      nullable: true
-      description: |
-        This field provides additional details about the reason for the cancellation request. It may include information from the customer, supplier, or support agent about the reason for the cancellation (especially in the case of requesting a cancellation outside of the normal policy which may require manual approval from the supplier).
-      example: 'Child came down with the flu the day before the activity.'
+    ProductOption:
+      type: object
+      required:
+        - id
+        - internalName
+        - units
+      properties:
+        id:
+          type: string
+          description: |
+            This MUST be a unique identifier within the scope of the Product.
+          example: '0001'
+        internalName:
+          type: string
+          description: |
+            This SHOULD be a friendly name for the Option to facilitate easier identification. It MUST NOT be shown to the customer.
+          example: 'Morning'
+        reference:
+          type: string
+          description: |
+            This is an internal reference identifier that the Supplier wishes to use. It MAY be non-unique.
+          example: 'LR1-01'
+        units:
+          type: array
+          items:
+            $ref: '#/components/schemas/Unit'
+          minItems: 1
+          example:
+            - id: 'adult'
+              internalName: 'Adult'
+              reference: 'LR1-01-01'
+              type: 'ADULT'
+            - id: '0001-0001-child'
+              internalName: 'Child'
+              reference: 'LR1-01-02'
+              type: 'CHILD'
     RedemptionMethod:
       type: string
       description: |
@@ -808,43 +860,62 @@ components:
         - DIGITAL
         - PRINT
       example: 'DIGITAL'
-    ResellerReference:
+    RefreshFrequency:
       type: string
-      nullable: true
+      enum:
+        - HOURLY
+        - DAILY
       description: |
-        An OPTIONAL tracking reference for the Reseller that SHOULD be tracked by the Booking Platform. This MUST be returned if the value was provided in the request body.
-      example: '001-002'
+        This is the RECOMMENDED refresh interval for the Reseller and SHOULD be used by the Reseller to control the frequency at which they make a `getBooking` request for the following scenarios:
+
+        * To see if a booking has changed out of a `PENDING` status into `CONFIRMED` or `REJECTED`.
+        * To see if a booking has had any new Vouchers or Tickets delivered for the booking.
+        * To see if a booking has changed from `CONFIRMED` to `CANCELLED` in the event of a supplier-initiated cancellation.
+        * To see if a booking has an updated `utcRedeemedAt`/`utcResolvedAt` value for the Voucher or any of the Tickets.
+      example: 'HOURLY'
+    Refund:
+      type: string
+      enum:
+        - FULL
+        - PARTIAL
+        - NONE
+      description: |
+        This value indicates the expected refund from the Supplier.
+        * `FULL` indicates that the Supplier has fully refunded the booking and will not be paid by the Reseller for this booking. This is the expected state when a valid cancellation request is made before any cancellation cutoff policy or when a Supplier approves a cancellation request that was made after the cutoff.
+        * `PARTIAL` indicates that the Supplier has agreed to partially refund the customer. This may be due to a cancellation policy that grants a partial refund or because the Supplier has agreed to partially refund the customer when the cancellation policy would otherwise have not allowed any refund.
+        * `NONE` indicates that no refund will be given by the Supplier. The customer may still be refunded by the Reseller but the Supplier MUST still be paid for this booking.
+      example: 'FULL'
     Status:
-          type: string
-          enum:
-            - ON_HOLD
-            - EXPIRED
-            - PENDING
-            - REJECTED
-            - CONFIRMED
-            - CANCELLED
-          description: |
-            After a successful `createReservation` request, the `status` MUST be `ON_HOLD`.
+      type: string
+      enum:
+        - ON_HOLD
+        - EXPIRED
+        - PENDING
+        - REJECTED
+        - CONFIRMED
+        - CANCELLED
+      description: |
+        After a successful `createBooking` request, the `status` MUST be `ON_HOLD`.
 
-            After a successful `confirmReservation` request, the `status` MUST be `CONFIRMED`.
+        After a successful `confirmBooking` request, the `status` MUST be `CONFIRMED`.
 
-            After a successful `confirmCancellation` request, the `status` MUST be `CANCELLED`.
+        After a successful `confirmCancellation` request, the `status` MUST be `CANCELLED`.
 
-            Following are the only valid Reservation flow status transitions:
+        Following are the only valid Booking flow status transitions:
 
-            * New Reservation -> `REJECTED`
-            * New Reservation -> `ON_HOLD` -> `EXPIRED`
-            * New Reservation -> `ON_HOLD` -> `CONFIRMED`
-            * New Reservation -> `ON_HOLD` -> `PENDING` -> `REJECTED`
-            * New Reservation -> `ON_HOLD` -> `PENDING` -> `CONFIRMED`
+        * New Booking -> `REJECTED`
+        * New Booking -> `ON_HOLD` -> `EXPIRED`
+        * New Booking -> `ON_HOLD` -> `CONFIRMED`
+        * New Booking -> `ON_HOLD` -> `PENDING` -> `REJECTED`
+        * New Booking -> `ON_HOLD` -> `PENDING` -> `CONFIRMED`
 
-            The `PENDING` status MAY appear only for products with the `instantConfirmation` property set to `false`. Poll the /bookings endpoint for status changes.
+        The `PENDING` status MAY appear only for products with the `instantConfirmation` property set to `false`. Poll the /bookings endpoint for status changes.
 
-            Following are the only valid Cancellation flow status transitions:
+        Following are the only valid Cancellation flow status transitions:
 
-            * `CONFIRMED` -> `CANCELLED`
-            * `ON_HOLD` -> `EXPIRED`
-          example: 'ON_HOLD'
+        * `CONFIRMED` -> `CANCELLED`
+        * `ON_HOLD` -> `EXPIRED`
+      example: 'ON_HOLD'
     Supplier:
       type: object
       required:
@@ -900,19 +971,11 @@ components:
           description: |
             This SHOULD be the mail address support contact for the Supplier. This information MAY be provided to the customer.
           example: '123 Main St, Anytown USA'
-    SupplierReference:
-      type: string
-      nullable: true
-      description: |
-        An OPTIONAL tracking reference for the Supplier that SHOULD be tracked by the Reseller.
-      example: 'ABC-123'
     Ticket:
       type: object
       required:
         - deliveryOptions
         - redemptionMethod
-        - utcDeliveredAt
-        - utcRedeemedAt
       properties:
         deliveryOptions:
           type: array
@@ -923,14 +986,12 @@ components:
         utcDeliveredAt:
           type: string
           format: date-time
-          nullable: true
           description: |
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the voucher was made available to the customer by the Supplier. This will typically be the same as `utcConfirmedAt`.
           example: '2019-10-31T08:30:00Z'
         utcRedeemedAt:
           type: string
           format: date-time
-          nullable: true
           description: |
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time. The value represents the time at which the customer redeemed this voucher.
           example: '2019-10-31T08:30:00Z'
@@ -957,20 +1018,7 @@ components:
             This is an internal reference identifier that the Supplier wishes to use. It MAY be non-unique.
           example: 'LR1-01-new'
         type:
-          type: string
-          description: |
-            This is the base unit type for this unit definition. A value of `TRAELLER` MUST only be used in replacement of `ADULT`, `CHILD`, `INFANT`, `YOUTH`, `STUDENT`, or `SENIOR`.
-          enum:
-            - ADULT
-            - CHILD
-            - INFANT
-            - YOUTH
-            - STUDENT
-            - SENIOR
-            - TRAVELLER
-            - RESOURCE
-            - OTHER
-          example: 'YOUTH'
+          $ref: '#/components/schemas/UnitType'
     UnitItem:
       type: object
       required:
@@ -988,21 +1036,22 @@ components:
             A valid unit ID that matches the `id` returned from `GET /suppliers/{supplierId}/products`.
           example: 'adult'
         resellerReference:
-          $ref: '#/components/schemas/ResellerReference'
+          type: string
+          description: |
+            An OPTIONAL tracking reference for the Reseller that SHOULD be tracked by the Booking Platform. This MUST be returned if the value was provided in the request body.
+          example: '001-002'
     UnitItemTicket:
       allOf:
         - $ref: '#/components/schemas/UnitItem'
         - type: object
-          required:
-            - ticket
           properties:
             supplierReference:
-              $ref: '#/components/schemas/SupplierReference'
+              type: string
+              description: |
+                An OPTIONAL tracking reference for the Supplier that SHOULD be tracked by the Reseller.
+              example: 'ABC-123'
             ticket:
-              # https://github.com/OAI/OpenAPI-Specification/issues/1368
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/Ticket'
+              $ref: '#/components/schemas/Ticket'
     UnitQuantity:
       type: object
       required:
@@ -1019,22 +1068,21 @@ components:
           description: |
             The total number of this unit that the customer wants to purchase.
           example: 2
-    Uuid:
+    UnitType:
       type: string
-      format: uuid
       description: |
-        This UUID is generated for the initial `createReservation` request and MUST never change. This value MUST be tracked by both the Reseller and Booking Platform for locating this record.
-      example: '7df49d62-57ad-44be-8373-e4c2fe7e63fe'
-    CalendarItem:
-      title: CalendarItem
-      type: object
-      properties:
-        localDate:
-          type: string
-          format: date
-        capacity:
-          type: integer
-          minimum: 0
+        This is the base unit type for this unit definition. A value of `TRAVELLER` MUST only be used in replacement of `ADULT`, `CHILD`, `INFANT`, `YOUTH`, `STUDENT`, or `SENIOR`.
+      enum:
+        - ADULT
+        - CHILD
+        - INFANT
+        - YOUTH
+        - STUDENT
+        - SENIOR
+        - TRAVELLER
+        - RESOURCE
+        - OTHER
+      example: 'YOUTH'
   responses:
     BadRequest:
       description: |
@@ -1051,9 +1099,9 @@ components:
     InternalServerError:
       description: |
         An unknown error occurred and the server cannot respond in a sensible way. The response may not include a valid error object if one could not be generated.
-    BookingReservationResponse:
+    BookingResponse:
       description: |
-        A complete representation of the current booking reservation status.
+        A complete representation of the current booking booking status.
       content:
         application/json:
           schema:
@@ -1108,22 +1156,11 @@ components:
       name: 'uuid'
       in: path
       description: |
-        A valid booking reservation UUID that matches the `uuid` sent during the initial `POST /suppliers/{supplierId}/bookings/{uuid}`
+        A valid booking UUID that matches the `uuid` sent during the initial `POST /suppliers/{supplierId}/bookings`
       required: true
       schema:
         type: string
         format: uuid
-    OptionIds:
-      name: optionIds
-      in: query
-      description: |
-        A list of valid option IDs that matches `id`s returned from `GET /suppliers/{supplierId}/products`. TODO: IS THIS REALLY CORRECT??
-      schema:
-        type: array
-        items:
-          type: string
-          format: string
-      required: false
   requestBodies:
     AvailabilityCheckRequest:
       required: true
@@ -1152,7 +1189,10 @@ components:
               availabilityIds:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AvailabilityId'
+                  type: string
+                  description: |
+                    A valid list of availability IDs that matches the `id` returned from `GET /availability`.
+                  example: '28271273-a317-40fc-8f42-79725a7072a3'
                 example:
                   - '28271273-a317-40fc-8f42-79725a7072a3'
                   - '6143d137-fdf6-4da1-a558-20aa93eb55f0'
@@ -1167,7 +1207,7 @@ components:
                   - id: 'child'
                     quantity: 1
                 minItems: 1
-    CreateReservationRequest:
+    CreateBookingRequest:
       required: true
       description: |
         This MUST include all unitItems that the customer wants to book.
@@ -1183,9 +1223,16 @@ components:
               - unitItems
             properties:
               uuid:
-                $ref: '#/components/schemas/Uuid'
+                type: string
+                format: uuid
+                description: |
+                  This UUID is generated for the initial `createBooking` request and MUST never change. This value MUST be tracked by both the Reseller and Booking Platform for locating this record.
+                example: '7df49d62-57ad-44be-8373-e4c2fe7e63fe'
               resellerReference:
-                $ref: '#/components/schemas/ResellerReference'
+                type: string
+                description: |
+                  An OPTIONAL tracking reference for the Reseller that SHOULD be tracked by the Booking Platform. This MUST be returned if the value was provided in the request body.
+                example: '001-002'
               productId:
                 type: string
                 description: |
@@ -1211,7 +1258,7 @@ components:
                 description: |
                   This is the duration that the Reseller would like the product inventory to be temporarily held while the booking is completed. The Booking Platform SHOULD reserve the inventory for at least this duration but MAY reserve for a shorter period of time. The exact hold expiration time will be returned in the response.
                 example: 30
-    ExtendReservationRequest:
+    ExtendBookingRequest:
       required: true
       description: |
         This MUST include the proper `reason` for requesting the extension and MUST NOT be abused to keep availability reserved due to processing delays by the Reseller.
@@ -1221,25 +1268,12 @@ components:
             type: object
             required:
               - reason
-              - reasonDetails
               - holdExpirationMinutes
             properties:
               reason:
-                type: string
-                enum:
-                  - FRAUD_CHECK
-                  - CUSTOMER_REQUESTED
-                  - OTHER
-                description: |
-                  This indicates the reason for extending the reservation hold.
-
-                  * `FRAUD_CHECK` is the most common scenario where additional time is required to ensure that the booking reservation is not being made using fraudulent payment information.
-                  * `CUSTOMER_REQUESTED` is intended for scenarios where the customer is actively completing the checkout process but requires some additional time to complete. The Reseller SHOULD try to ensure that customers may only extend their reservation once.
-                  * `OTHER` can be used in other unusual circumstances but SHOULD not be abused to maintain a hold without good reason. If this value is specified the Reseller SHOULD provide `reasonDetails` to explain the justification.
-                example: 'FRAUD_CHECK'
+                $ref: '#/components/schemas/ExtendReason'
               reasonDetails:
                 type: string
-                nullable: true
                 description: |
                   This provides additional details behind the reason for requesting the extension and SHOULD be provided in all cases, but especially if the `reason` given is `OTHER`.
                 example: 'Manual fraud review with 2-hour SLA.'
@@ -1248,10 +1282,10 @@ components:
                 description: |
                   This is the duration that the Reseller would like the product inventory hold to be extended while the booking is completed. The Booking Platform SHOULD extend the hold on the inventory for at least this duration from the time of the request but MAY reserve for a shorter period of time. The exact hold expiration time will be returned in the response.
                 example: 120
-    ConfirmReservationRequest:
+    ConfirmBookingRequest:
       required: true
       description: |
-        This confirms an existing booking reservation and MUST be sent before the `utcHoldExpiration` has elapsed.
+        This confirms an in-progress booking and MUST be sent before the `utcHoldExpiration` has elapsed.
       content:
         application/json:
           schema:
@@ -1260,17 +1294,47 @@ components:
               - contact
             properties:
               resellerReference:
-                $ref: '#/components/schemas/ResellerReference'
+                type: string
+                description: |
+                  An OPTIONAL tracking reference for the Reseller that SHOULD be tracked by the Booking Platform. This MUST be returned if the value was provided in the request body.
+                example: '001-002'
               contact:
                 $ref: '#/components/schemas/Contact'
+    CancelBookingRequest:
+      required: true
+      description: |
+        This request will release the inventory hold on an in-progress booking or cancel a completed booking. It is RECOMMENDED that this request be sent if the customer fails to complete their booking, in order to release the inventory for other customers. It is also RECOMMENDED that this request be sent for a completed booking even if no refund is expected so that the Supplier can attempt to sell the unused inventory to another customer.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - reason
+              - reasonDetails
+            properties:
+              reason:
+                $ref: '#/components/schemas/CancelReason'
+              reasonDetails:
+                type: string
+                description: |
+                  This field provides additional details about the reason for the cancellation request. It may include information from the customer, supplier, or support agent about the reason for the cancellation (especially in the case of requesting a cancellation outside of the normal policy which may require manual approval from the supplier).
+                example: 'Child came down with the flu the day before the activity.'
 
   securitySchemes:
-    apiKey:
-      type: apiKey
-      name: Authorization
-      in: header
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Bearer {apiKey}
+
+security:
+  - bearerAuth: []
+
 tags:
   - name: Suppliers
   - name: Products
   - name: Availability
   - name: Bookings
+
+externalDocs:
+  description: OCTo Home
+  url: http://octospec.com/
