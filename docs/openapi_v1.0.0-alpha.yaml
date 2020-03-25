@@ -144,11 +144,28 @@ paths:
                     localDateTimeEnd: '2019-10-31T10:00:00'
                     status: 'AVAILABLE'
                     vacancies: 100
+                    units:
+                      - id: 'adult'
+                        pricing:
+                          net: 45
+                          retail: 60
+                          currency: AUD
+                      - id: 'child'
+                        pricing:
+                        net: 28
+                        retail: 30
+                        currency: AUD
                   - id: '6143d137-fdf6-4da1-a558-20aa93eb55f0'
                     localDateTimeStart: '2019-10-31T12:00:00'
                     localDateTimeEnd: '2019-10-31T13:00:00'
                     status: 'FREESALE'
                     vacancies: null
+                    units:
+                      - id: 'youth_10_17'
+                        pricing:
+                          net: 70
+                          retail: 90
+                          currency: AUD
         '400':
           content:
             application/json:
@@ -627,10 +644,6 @@ components:
             This MUST be an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) compliant date and time.
           format: date-time
           example: '2019-10-31T10:00:00'
-        pricing:
-          type: array
-          description:
-          $ref: '#/components/schemas/UnitPrice'
     AvailabilityCalendarItem:
       type: object
       required:
@@ -657,6 +670,7 @@ components:
         - type: object
           required:
             - status
+            - units
           properties:
             status:
               $ref: '#/components/schemas/AvailabilityStatus'
@@ -666,6 +680,14 @@ components:
                 This SHOULD NOT be returned when `status` is `FREESALE`. This SHOULD be a shared pool for all Unit types in the Option. If availability is tracked per-Unit then this value MUST be equal to the available quantity for the Unit that has the most remaining.
               example: 100
               minimum: 0
+            units:
+              type: array
+              description: |
+                All units and their prices attached to this availability slot. It is REQUIRED that all units MUST be present here at the availability level in order to make them bookable. A price override MAY be applied to a unit, in case of a dynamic pricing per availability is supported.
+
+                Take, for example, a product with an `adult` unit. To make the `adult` unit bookable, it MUST be present at the availability level either with a default price from a product option level or an overridden dynamic price. The goal is to make a client implementation easier and avoid making another call to fetch a default price from a product.
+              items:
+                $ref: '#/components/schemas/UnitAvailability'
     AvailabilityStatus:
       type: string
       description: |
@@ -1040,10 +1062,24 @@ components:
                   internalName: 'Adult'
                   reference: 'LR1-01-01'
                   type: 'ADULT'
+                  pricing:
+                    - net: 80
+                      retail: 100
+                      currency: AUD
+                    - net: 60
+                      retail: 75
+                      currency: USD
                 - id: '0001-0001-child'
                   internalName: 'Child'
                   reference: 'LR1-01-02'
                   type: 'CHILD'
+                  pricing:
+                    - net: 40
+                      retail: 50
+                      currency: AUD
+                    - net: 30
+                      retail: 38
+                      currency: USD
             - id: '0002'
               internalName: 'Afternoon'
               reference: 'LR1-02'
@@ -1052,10 +1088,24 @@ components:
                   internalName: 'Adult'
                   reference: 'LR1-01-01'
                   type: 'ADULT'
+                  pricing:
+                    - net: 80
+                      retail: 100
+                      currency: AUD
+                    - net: 60
+                      retail: 75
+                      currency: USD
                 - id: '0001-0001-child'
                   internalName: 'Child'
                   reference: 'LR1-01-02'
                   type: 'CHILD'
+                  pricing:
+                    - net: 40
+                      retail: 50
+                      currency: AUD
+                    - net: 30
+                      retail: 38
+                      currency: USD
     ProductOption:
       type: object
       required:
@@ -1268,11 +1318,30 @@ components:
           $ref: '#/components/schemas/UnitType'
         pricing:
           type: array
-          $ref: '#/components/schemas/UnitPrice'
+          description: |
+            A default pricing for a product option. This default price MUST be provided here on a product option level. A unit price MAY be overriden on availability level if a dynamic pricing is supported. All currencies supported by a product MUST be included here.
+          items:
+            $ref: '#/components/schemas/UnitPrice'
+    UnitAvailability:
+      type: object
+      required:
+        - id
+        - pricing
+      properties:
+        id:
+          type: string
+          description: |
+            This MUST be a unique identifier within the scope of an Availability and it MUST be one of the Ids defined on this product option.
+          example: 'youth_10_17'
+        pricing:
+          type: array
+          description: A unit pricing, a dynamic product price override for a particular unit and currency applied for this availability slot.
+          items:
+            $ref: '#/components/schemas/UnitPrice'
     UnitPrice:
       type: object
       description: |
-        A unit pricing. A default unit price MUST be configured on a product level. A unit price MAY be overriden on availability level if a dynamic pricing is supported. A set of unit prices on availability level MUST BE a subset of product level prices.
+        A unit pricing for a particular currency.
       required:
         - net
         - retail
@@ -1281,12 +1350,12 @@ components:
         net:
           type: number
           description: |
-            This MUST be a unique identifier within the scope of the Option.
+            A NET price of this unit.
           example: '80'
         retail:
           type: number
           description: |
-            This SHOULD be a user-friendly name for the Unit which can be shown to the customer.
+            A recommended retail price of this unit.
           example: '100'
         currency:
           type: string
