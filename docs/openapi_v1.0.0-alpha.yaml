@@ -585,7 +585,6 @@ components:
             `9008`: Hold period too long  
             `9009`: Cannot extend hold period  
             `9010`: Reservation ID not found  
-            `9011`: Reservation expired  
             `9999`: Generic error for all unexpected / unknown cases  
               
           example: 'core/9000'
